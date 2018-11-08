@@ -31,7 +31,7 @@ class LSystem {
     setAxiom("X"); 
     V = new Production[10]; 
     numExpr = 0; 
-    // Figure 1.24A 
+    //Figure 1.24A 
     // Axiom: F 
     // Iterations: 5
     //addProduction("F","F[+F]F[-F]F");
@@ -244,9 +244,9 @@ void setup() {
     Production currentProduction = lSystem.getProduction(i);
     print("Production " + i + ": " + currentProduction.a + "->" + currentProduction.x + "\n");
   }
-  String treeExpression = lSystem.retNDevStep(7);
+  String treeExpression = lSystem.retNDevStep(5);
   // Intantiate turtle object with L-System generated expression
-  turtle treeTurtle = new turtle(treeExpression, 25.7f, 3.0f); 
+  turtle treeTurtle = new turtle(treeExpression, 25.7f, 5.0f); 
   treeTurtle.drawExpression2D(-90, new pointObj(500.0, 1000.0, 0.0));
 }
 
