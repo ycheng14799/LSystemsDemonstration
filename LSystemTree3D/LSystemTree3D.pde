@@ -1,6 +1,35 @@
 import java.lang.Math;
 import java.lang.Math; 
 
+// Global turtle object
+turtle3D turtle; 
+
+// Setup function 
+void setup() { 
+  // Initialize window 
+  size(1280, 720, P3D);
+  
+  // Initialize turtle 
+  turtle = new turtle3D("F", 150, 10, PI / 4);
+}
+
+void draw() {
+  background(0);
+  lights();
+  noStroke(); 
+  fill(255, 255, 255);
+  // Placement of tree at (width/2, height, 0); 
+  centreTree();
+  turtle.drawExpression3D();
+  
+  /*
+  drawCylinder(10, 10, 140, 64);
+  translate(0, 140);
+  rotateZ(PI/4);
+  drawCylinder(10, 10, 140, 64);
+  */
+}
+
 // Production class 
 class Production {
   // Alphabet 
@@ -28,8 +57,8 @@ class LSystem {
     setAxiom("A"); 
     V = new Production[10]; 
     numExpr = 0; 
-    addProduction("A", "[&FL!A]/////'[&FL!A]///////'[&FL!A]");
-    addProduction("F", "S/////F");
+    addProduction("A", "[&FL!A]>>>>>'[&FL!A]>>>>>>>'[&FL!A]");
+    addProduction("F", "S>>>>>F");
     addProduction("S","FL");
     addProduction("L","['''^^{-f+f+f-|-f+f+f}]"); 
   }
@@ -100,5 +129,115 @@ class LSystem {
   // Function for getting the nth development step 
   public String retNDevStep(int steps) {
     return retNDevStepRecurse(omega, steps); 
+  }
+}
+
+void drawCylinder(float topRadius, float bottomRadius, float tall, int sides) {
+  // Initialize starting angle 
+  float angle = 0;
+  // Initialize increment for drawing cylinder 
+  float angleIncrement = TWO_PI / sides;
+  beginShape(QUAD_STRIP);
+  // Draw cylinder sides 
+  for (int i = 0; i < sides + 1; ++i) {
+    vertex(bottomRadius*cos(angle), tall, bottomRadius*sin(angle));
+    vertex(topRadius*cos(angle), 0, topRadius*sin(angle));
+    
+    angle += angleIncrement;
+  }
+  endShape();
+  
+  // If it is not a cone, draw the circular top cap
+  if (topRadius != 0) {
+    angle = 0;
+    beginShape(TRIANGLE_FAN);
+    
+    // Center point
+    vertex(0, 0, 0);
+    for (int i = 0; i < sides + 1; i++) {
+      vertex(topRadius * cos(angle), 0, topRadius * sin(angle));
+      angle += angleIncrement;
+    }
+    endShape();
+  }
+  // If it is not a cone, draw the circular bottom cap
+  if (bottomRadius != 0) {
+    angle = 0;
+    beginShape(TRIANGLE_FAN);
+
+    // Center point
+    vertex(0, tall, 0);
+    for (int i = 0; i < sides + 1; i++) {
+      vertex(bottomRadius * cos(angle), tall, bottomRadius * sin(angle));
+      angle += angleIncrement;
+    }
+    endShape();
+  }
+}
+
+// Centering function 
+void centreTree() {
+  fill(255, 255, 255);
+  rotateZ(-PI);
+  translate(-width, -height);
+  translate(width/2, 0);
+}
+
+// 3D Turtle Class 
+class turtle3D {
+  // State variables 
+  // Branch length 
+  private float segLen; 
+  // Branch radius 
+  private float segRad;
+  // Branch cylinder faces 
+  private int segFaces;
+  // Rotation angle 
+  private float rotAng;
+  // L-System generated expression 
+  private String expression;
+  
+  //Constructor 
+  turtle3D(String expression, float segLen, float segRad, float rotAng) {
+    // Set state variables 
+    this.segLen = segLen;
+    this.segRad = segRad; 
+    this.expression = expression;
+    this.rotAng = rotAng; 
+    this.segFaces = 64;
+    
+  }
+  
+  // Draw expression function 
+  // F:Forward 
+  // [: Push onto the stack 
+  // ]: Pop from stack
+  // +: Turn left about negative y-axis (right about y-axis)
+  // -: Turn right about negative y-axis (left about y-axis)
+  // &: Pitch down about negative x-axis (up about x-axis)
+  // ^: Pitch up about negative x-axis (down about x-axis)
+  // <: Roll left about z-axis 
+  // >: Roll right about z-axis 
+  public void drawExpression3D() {
+    // Iterate through expression 
+    for(int i = 0; i < expression.length(); i++) { 
+      char currentCommand = expression.charAt(i); 
+      print(currentCommand);
+      switch (currentCommand) {
+        case 'F':
+          // Draw Forward 
+          drawCylinder(segRad, segRad, segLen, segFaces); 
+          // Translate forward by segLen 
+          translate(0, segLen, 0); 
+          break;
+        case '>':
+          // Roll right about z-axis
+          rotateZ(rotAng);
+          break;
+        case '<': 
+          rotateZ(-rotAng); 
+          break;
+      }
+    }
   }
 }
