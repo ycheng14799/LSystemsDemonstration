@@ -7,10 +7,22 @@ turtle3D turtle;
 // Setup function 
 void setup() { 
   // Initialize window 
-  size(1280, 720, P3D);
+  size(2560, 1440, P3D);
+  // Generate expression using L-System object 
+  LSystem lSystem = new LSystem(); 
+  // Print axiom
+  print("Axiom: " + lSystem.getAxiom() + "\n"); 
+  int numProd = lSystem.getNumProd();
+  // Print productions 
+  for(int i = 0; i < numProd; i++) {
+    Production currentProduction = lSystem.getProduction(i);
+    print("Production " + i + ": " + currentProduction.a + "->" + currentProduction.x + "\n");
+  }
+  // Generate the tree expression 
+  String treeExpression = lSystem.retNDevStep(3);
   
   // Initialize turtle 
-  turtle = new turtle3D("F", 150, 10, PI / 4);
+  turtle = new turtle3D(treeExpression, 100, 10, (PI / 180.0f) * 25.7f);
 }
 
 void draw() {
@@ -19,15 +31,13 @@ void draw() {
   noStroke(); 
   fill(255, 255, 255);
   // Placement of tree at (width/2, height, 0); 
-  centreTree();
+  //centreTree();
+  camera(3000*cos(millis() / 500), 3000.0f, 3000*sin(millis() / 500), 0.0f, 1500.0f, 0.0f, 0.0f, -1.0f, 0.0f);
+  background(0);
+  lights();
+  noStroke(); 
+  fill(255, 255, 255);
   turtle.drawExpression3D();
-  
-  /*
-  drawCylinder(10, 10, 140, 64);
-  translate(0, 140);
-  rotateZ(PI/4);
-  drawCylinder(10, 10, 140, 64);
-  */
 }
 
 // Production class 
@@ -54,13 +64,10 @@ class LSystem {
   // Constructor 
   LSystem() {
     // Initialize variables 
-    setAxiom("A"); 
+    setAxiom("F"); 
     V = new Production[10]; 
     numExpr = 0; 
-    addProduction("A", "[&FL!A]>>>>>'[&FL!A]>>>>>>>'[&FL!A]");
-    addProduction("F", "S>>>>>F");
-    addProduction("S","FL");
-    addProduction("L","['''^^{-f+f+f-|-f+f+f}]"); 
+    addProduction("F", "F[>F][^F]F[<F][&F]F");
   }
   
   // Method for setting the axiom 
@@ -180,7 +187,7 @@ void centreTree() {
   fill(255, 255, 255);
   rotateZ(-PI);
   translate(-width, -height);
-  translate(width/2, 0);
+  translate(width/2, 100);
 }
 
 // 3D Turtle Class 
@@ -221,8 +228,7 @@ class turtle3D {
   public void drawExpression3D() {
     // Iterate through expression 
     for(int i = 0; i < expression.length(); i++) { 
-      char currentCommand = expression.charAt(i); 
-      print(currentCommand);
+      char currentCommand = expression.charAt(i);
       switch (currentCommand) {
         case 'F':
           // Draw Forward 
@@ -235,8 +241,33 @@ class turtle3D {
           rotateZ(rotAng);
           break;
         case '<': 
+          // Roll left about z-axis 
           rotateZ(-rotAng); 
           break;
+        case '+':
+          // Turn right about y-axis 
+          rotateY(-rotAng);
+          break;
+        case '-': 
+          // Turn left about y-axis 
+          rotateY(rotAng); 
+          break; 
+        case '&': 
+          // Pitch up about x-axis 
+          rotateX(-rotAng); 
+          break; 
+        case '^': 
+          // Pitch down about x-axis 
+          rotateX(rotAng); 
+          break; 
+        case '[': 
+          // Push matrix 
+          pushMatrix(); 
+          break;
+        case ']': 
+          // Pop matrix 
+          popMatrix(); 
+          break; 
       }
     }
   }
